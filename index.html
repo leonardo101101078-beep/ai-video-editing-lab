@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 自動剪輯研究</title>
+<meta name="description" content="用 Claude 加剪映 MCP、Higgsfield、HyperFrames 做自動剪輯的研究紀錄：工作流、能做什麼、限制、案例、工具與模板。持續更新。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f3ee; --surface:#fffdf9; --ink:#1d1b18; --muted:#6b655c; --line:#e4ddd2;
+  --c1:#2f6f5e; --c1-soft:#e2efe9;   /* AI 剪輯 */
+  --c2:#b5552d; --c2-soft:#f6e6dc;   /* AI 生成 */
+  --c3:#4a4a9c; --c3-soft:#e7e7f5;   /* 混合 */
+  --ok:#2f7d4f; --wait:#a8781c; --no:#a33a3a;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#151412; --surface:#1e1c19; --ink:#ece7df; --muted:#a39b8f; --line:#34302a;
+    --c1:#6cc1a8; --c1-soft:#1f2f2a; --c2:#e58b62; --c2-soft:#33231b; --c3:#9d9df0; --c3-soft:#25253b;
+    --ok:#6bc48f; --wait:#e0b456; --no:#e57b7b;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#151412; --surface:#1e1c19; --ink:#ece7df; --muted:#a39b8f; --line:#34302a;
+  --c1:#6cc1a8; --c1-soft:#1f2f2a; --c2:#e58b62; --c2-soft:#33231b; --c3:#9d9df0; --c3-soft:#25253b;
+  --ok:#6bc48f; --wait:#e0b456; --no:#e57b7b;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.75 "Noto Sans TC",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:960px;margin:0 auto;padding:0 16px}
+h1,h2,h3{font-family:"Noto Serif TC",serif;line-height:1.3;margin:0}
+h1{font-size:clamp(2rem,6vw,3.4rem);font-weight:900;letter-spacing:.01em}
+h2{font-size:clamp(1.5rem,4vw,2.1rem);font-weight:900}
+h3{font-size:1.15rem;font-weight:600}
+p{margin:.5em 0}
+a{color:inherit}
+small,.muted{color:var(--muted)}
+
+/* nav */
+nav{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;gap:4px 18px;align-items:center;overflow-x:auto;white-space:nowrap;padding-top:10px;padding-bottom:10px;font-size:.9rem}
+nav a{text-decoration:none;color:var(--muted)}
+nav a:hover{color:var(--ink)}
+nav .theme{margin-left:auto;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:99px;padding:2px 12px;font:inherit;cursor:pointer}
+
+/* hero */
+header.wrap{padding-top:72px;padding-bottom:40px}
+.kicker{font-size:.85rem;letter-spacing:.12em;color:var(--muted)}
+.lead{font-size:1.15rem;max-width:40em;margin-top:18px}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.pill{display:inline-block;border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:2px 12px;font-size:.85rem;text-decoration:none}
+.pill b{font-weight:700}
+
+section{padding:48px 0;border-top:1px solid var(--line)}
+.sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:8px;flex-wrap:wrap}
+.num{font-family:"Noto Serif TC",serif;font-weight:900;font-size:2.4rem;line-height:1}
+.sub{color:var(--muted);margin-bottom:24px}
+
+/* workflow steps */
+.steps{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;counter-reset:s}
+.steps li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;counter-increment:s;position:relative}
+.steps li::before{content:counter(s);font-family:"Noto Serif TC",serif;font-weight:900;font-size:1.6rem;color:var(--muted);line-height:1;display:block;margin-bottom:6px}
+.steps b{display:block;font-size:1.02rem}
+.steps p{font-size:.92rem;margin:.3em 0 .6em}
+.who{display:inline-block;font-size:.75rem;font-weight:700;padding:0 8px;border-radius:99px}
+.who.ai{color:var(--c3);background:var(--c3-soft)} .who.me{color:var(--c2);background:var(--c2-soft)} .who.both{color:var(--c1);background:var(--c1-soft)}
+
+/* how AI reads video */
+.read{display:grid;grid-template-columns:1fr 1.4fr;gap:20px;align-items:start}
+@media (max-width:760px){.read{grid-template-columns:1fr}}
+.read ol{margin:0;padding-left:1.3em}
+.read li{margin:.5em 0}
+.read figure{margin:0}
+.read img{width:100%;height:auto;border-radius:10px;border:1px solid var(--line);display:block}
+.read figcaption{font-size:.85rem;color:var(--muted);margin-top:6px}
+
+/* overview cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;text-decoration:none;display:block}
+.tag{display:inline-block;font-size:.8rem;font-weight:700;padding:1px 10px;border-radius:99px;margin-bottom:10px}
+.t1{color:var(--c1);background:var(--c1-soft)} .t2{color:var(--c2);background:var(--c2-soft)} .t3{color:var(--c3);background:var(--c3-soft)}
+
+/* flow diagram */
+.flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:10px;align-items:center;margin-top:28px}
+.flow .col{display:grid;gap:8px}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:.9rem}
+.box b{display:block;font-size:.95rem}
+.arrow{color:var(--muted);font-size:1.4rem;text-align:center}
+@media (max-width:720px){.flow{grid-template-columns:1fr}.arrow{transform:rotate(90deg)}}
+
+/* tools */
+.tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin:0 0 20px}
+.tool{border-radius:10px;padding:12px 14px;font-size:.9rem;border:1px solid var(--line);background:var(--surface)}
+.tool b{display:block;font-size:.98rem}
+.tool .price{display:inline-block;margin-top:4px;font-size:.78rem;font-weight:700;color:var(--muted)}
+
+/* two-column can/can't */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:720px){.grid2{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+.panel h3{margin-bottom:8px}
+.panel ul{margin:0;padding-left:1.2em}
+.panel li{margin:.3em 0}
+.can h3{color:var(--ok)} .cant h3{color:var(--no)}
+.note{margin-top:14px;padding:12px 16px;border-radius:10px;font-size:.92rem;background:var(--surface);border:1px dashed var(--line)}
+
+/* cases */
+.case{display:grid;grid-template-columns:340px 1fr;gap:24px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:18px}
+@media (max-width:760px){.case{grid-template-columns:1fr}}
+.case .media{display:flex;flex-direction:column;gap:10px;align-items:center}
+.case iframe{width:100%;max-width:340px;border:0;border-radius:12px;background:var(--bg)}
+.case iframe.ig{height:620px}
+.case iframe.fb{aspect-ratio:9/16;height:auto}
+.case video{width:100%;height:auto;max-width:340px;border-radius:12px;display:block}
+.case h3{font-size:1.3rem;margin:4px 0 6px}
+.specs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
+.specs span{font-size:.8rem;border:1px solid var(--line);border-radius:99px;padding:0 10px}
+.case h4{margin:14px 0 4px;font-size:.92rem;color:var(--muted)}
+.case ol,.case ul{margin:0;padding-left:1.3em;font-size:.94rem}
+.case li{margin:.25em 0}
+.linkcard{display:block;width:100%;max-width:340px;text-decoration:none;border-radius:12px;padding:22px 18px;color:#fff;background:linear-gradient(140deg,#7a3b1c,#c9772e 55%,#e8b04a)}
+.linkcard small{color:rgba(255,255,255,.8);display:block}
+.linkcard b{font-family:"Noto Serif TC",serif;font-size:1.3rem;display:block;margin:4px 0}
+.linkcard span{font-size:.85rem}
+.ext{font-size:.85rem;color:var(--muted)}
+
+/* table */
+.tbl{width:100%;border-collapse:collapse;font-size:.92rem}
+.tbl th,.tbl td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.tbl th{font-weight:700;color:var(--muted);font-size:.82rem}
+.scroll{overflow-x:auto}
+.st{white-space:nowrap;font-weight:700}
+.st.ok{color:var(--ok)} .st.wait{color:var(--wait)}
+
+/* bars */
+.bars{display:grid;gap:10px;margin-top:10px}
+.bar{display:grid;grid-template-columns:9em 1fr 5.5em;gap:10px;align-items:center;font-size:.9rem}
+.bar .track{height:14px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar .fill{height:100%;background:var(--c3);border-radius:99px}
+.bar .val{text-align:right;font-variant-numeric:tabular-nums}
+@media (max-width:520px){.bar{grid-template-columns:6.5em 1fr 4.8em;font-size:.82rem}}
+
+.log{list-style:none;padding:0;margin:0}
+.log li{padding:12px 0;border-bottom:1px solid var(--line)}
+.log time{font-weight:700;margin-right:10px}
+footer{padding:40px 0 60px;color:var(--muted);font-size:.85rem;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap">
+  <a href="#workflow">工作流</a>
+  <a href="#read">AI 怎麼看片</a>
+  <a href="#overview">三類做法</a>
+  <a href="#cases">案例</a>
+  <a href="#kit">工具與模板</a>
+  <a href="#numbers">數字</a>
+  <a href="glossary/">術語目錄</a>
+  <a href="#log">更新紀錄</a>
+  <button class="theme" id="themeBtn" type="button">深／淺</button>
+</div></nav>
+
+<header class="wrap">
+  <div class="kicker">研究筆記 · 持續更新</div>
+  <h1>AI 自動剪輯研究</h1>
+  <p class="lead">讓 AI 剪片，但剪完人還能改：不直接輸出死的 mp4，而是讓 Claude 寫出<strong>剪映原生草稿</strong>，打開剪映就能逐段、逐字幕修改，最後手動導出。</p>
+  <div class="meta">
+    <span class="pill">最後更新 <b id="updated">2026-10-16</b></span>
+    <span class="pill">研究起始 2026-09-28</span>
+    <span class="pill">完成約 20 個實作專案</span>
+    <a class="pill" href="glossary/">剪輯術語目錄 168 條 →</a>
+  </div>
+</header>
+
+<main>
+
+<!-- 工作流 -->
+<section id="workflow"><div class="wrap">
+  <h2>工作流</h2>
+  <p class="sub">一支片從素材到成品的 7 個步驟。AI 做大部分苦工，人負責確認方向和最後收尾。</p>
+  <ol class="steps">
+    <li><b>素材整理</b><p>AI 看完全部影片，分類、建索引：拍了什麼、在哪、哪幾秒能用。</p><span class="who ai">AI</span></li>
+    <li><b>腳本</b><p>AI 依素材寫大綱和口白稿，人確認、修改。</p><span class="who both">AI＋人</span></li>
+    <li><b>口播</b><p>人自己錄音，或用 AI 配音。</p><span class="who both">人或 AI</span></li>
+    <li><b>聲音處理</b><p>語音辨識成逐字稿，剪掉空白和口誤，對齊中英字幕。</p><span class="who ai">AI</span></li>
+    <li><b>補畫面與字卡</b><p>AI 生成沒拍到的鏡頭；用程式做 MG 動畫、字卡、片頭。</p><span class="who ai">AI</span></li>
+    <li><b>組裝</b><p>AI 寫成剪映草稿：多軌畫面、字幕、音樂、音效都排好。</p><span class="who ai">AI</span></li>
+    <li><b>人工收尾</b><p>打開剪映微調細節，手動導出成片。</p><span class="who me">人</span></li>
+  </ol>
+</div></section>
+
+<!-- AI 怎麼讀取影片 -->
+<section id="read"><div class="wrap">
+  <h2>AI 怎麼讀取影片？</h2>
+  <p class="sub">AI 不會「播放」影片。它是把影片拆成看得懂的東西：圖片、文字、數字。</p>
+  <div class="read">
+    <ol>
+      <li><b>畫面 → 聯絡表</b><br>每支影片抽 3 張畫格，排成一張大圖，標上檔名和長度。AI 看一張圖就等於看了十幾支影片。</li>
+      <li><b>聲音 → 逐字稿</b><br>本機語音辨識把講話轉成文字，每個字都附時間。AI 就能「照字剪」：刪掉哪句話，就知道要切哪幾秒。</li>
+      <li><b>檔案 → 規格</b><br>讀出長度、解析度、直橫、有沒有旋轉，先轉成好處理的格式。</li>
+      <li><b>寫成索引</b><br>三者合成一份素材索引（主體、場景、可用秒數），之後 AI 照索引選片、對時間。</li>
+    </ol>
+    <figure>
+      <img src="assets/contact-sheet.jpg" alt="潛水 vlog 素材的聯絡表：12 支影片各抽 3 格排成一張，每列上方標檔名與秒數" loading="lazy" width="1600" height="1019">
+      <figcaption>實際用過的聯絡表（潛水 vlog）：一張圖＝12 支影片，每支 3 格，上方是檔名與長度。</figcaption>
+    </figure>
+  </div>
+</div></section>
+
+<!-- 三類做法 -->
+<section id="overview"><div class="wrap">
+  <h2>三類做法</h2>
+  <p class="sub">四個主要工具各管一段：剪映 MCP／ChatCut 負責剪接，Higgsfield 生成畫面，HyperFrames 做動畫字卡。</p>
+  <div class="cards">
+    <a class="card" href="#edit"><span class="tag t1">① AI 剪輯</span><h3>剪完還能手改</h3><p class="muted">AI 挑片、去氣口、排時間軸、上字幕，交出剪映草稿，人再收尾。</p></a>
+    <a class="card" href="#gen"><span class="tag t2">② AI 生成</span><h3>沒拍到的畫面</h3><p class="muted">AI 生成鏡頭、示意動畫、MG 動畫、3D 模型、封面。</p></a>
+    <a class="card" href="#mix"><span class="tag t3">③ 混合</span><h3>剪輯＋生成＋字卡</h3><p class="muted">真人實拍＋AI B-roll＋MG 字卡，一次組成可改的成品。</p></a>
+  </div>
+
+  <div class="flow" aria-label="工具分工圖">
+    <div class="col">
+      <div class="box"><b>實拍素材</b>口播、vlog、店面</div>
+      <div class="box"><b>Higgsfield</b>AI 鏡頭、圖生影片</div>
+      <div class="box"><b>HyperFrames</b>MG 動畫、字卡（透明影片）</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="col">
+      <div class="box"><b>Claude</b>看片、寫腳本、配音、切片、對時間</div>
+      <div class="box"><b>剪映 MCP</b>寫成多軌剪映草稿</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="col">
+      <div class="box"><b>剪映</b>人工微調</div>
+      <div class="box"><b>手動導出</b>mp4 成片</div>
+    </div>
+  </div>
+</div></section>
+
+<!-- ① AI 剪輯 -->
+<section id="edit"><div class="wrap">
+  <div class="sec-head"><span class="num" style="color:var(--c1)">①</span><h2>AI 剪輯（剪完還能手改）</h2></div>
+  <p class="sub">AI 把片剪到八九成，交出剪映草稿；字幕、片段、音量都還是可以拖、可以改的原生物件。</p>
+  <div class="tools">
+    <div class="tool"><b>剪映 MCP</b>開源外掛，讓 AI 直接寫出剪映草稿；打開剪映就是排好的時間軸，每段都能改。<span class="price">免費</span></div>
+    <div class="tool"><b>ChatCut</b>內建 AI 助手的剪輯軟體，看逐字稿就能剪，人和 AI 共用同一條時間軸；有官方 MCP 可串接。<span class="price">部分付費・還沒實測</span></div>
+    <div class="tool"><b>mlx-whisper</b>在 Mac 本機跑的語音辨識，把講話轉成逐字稿，每個字附時間。<span class="price">免費</span></div>
+    <div class="tool"><b>ffmpeg</b>影音處理的瑞士刀：轉檔、切片、調音量、抽畫格。<span class="price">免費</span></div>
+  </div>
+  <div class="grid2">
+    <div class="panel can"><h3>能做到</h3><ul>
+      <li>從零建<strong>多軌剪映草稿</strong>：影片、配音、音樂、疊加動畫分軌</li>
+      <li><strong>原生字幕</strong>（中英），在剪映裡可直接改字</li>
+      <li>口播<strong>去氣口／去空白</strong>：語音辨識逐詞切，緊湊不變速</li>
+      <li>關鍵幀：推鏡、淡入淡出、<strong>每刀分別調音量</strong></li>
+      <li>大量片段：一份草稿 <strong>300 多段</strong>，建草稿只要十幾秒</li>
+      <li><strong>vlog 全自動粗剪</strong>：看完全部素材 → 寫腳本 → 出草稿</li>
+      <li>依剪映顏色標記重排片段（例：164 段潛水素材）</li>
+      <li>旅行音樂卡點快剪：依節拍切鏡、避開相似鏡頭</li>
+      <li>轉場替代：黑場、A/B 兩軌交叉疊化</li>
+    </ul></div>
+    <div class="panel cant"><h3>限制</h3><ul>
+      <li>不能自動導出 mp4，要在剪映手動導出</li>
+      <li>剪映裡的手改<strong>不會回傳</strong>給 AI；AI 再改會蓋掉手改，所以要先讓 AI 改到八九成</li>
+      <li>寫入草稿前，剪映必須完全關閉</li>
+      <li>讀不了剪映自己存的加密草稿，所以不能「人先粗剪、AI 接手」</li>
+      <li>沒有曲線變速、自動卡點；剪映會員素材不能用</li>
+      <li>素材要本機路徑；帶旋轉資訊的手機影片要先轉正</li>
+    </ul></div>
+  </div>
+</div></section>
+
+<!-- ② AI 生成 -->
+<section id="gen"><div class="wrap">
+  <div class="sec-head"><span class="num" style="color:var(--c2)">②</span><h2>AI 生成（畫面、動畫、MG）</h2></div>
+  <p class="sub">補沒拍到的鏡頭、做示意動畫與 MG 動畫。成品是一段段影片，要改只能重新生成或改程式重渲染。</p>
+  <div class="tools">
+    <div class="tool"><b>Higgsfield</b>串接多家生圖、生影片模型（Kling、Seedance 等）的 AI 創作平台，可生成圖片、影片、配音、3D 模型；有官方 MCP 可串接。<span class="price">需付費，按積分扣</span></div>
+    <div class="tool"><b>HyperFrames</b>用網頁程式寫動畫、再渲染成影片的開源工具；做 MG、字卡、片頭，可輸出透明背景。<span class="price">免費</span></div>
+    <div class="tool"><b>mg-styles-15</b>開源的 15 種 MG 動畫風格提示詞與範例，換成自己的故事就能用。<span class="price">免費</span></div>
+    <div class="tool"><b>Anatomy</b>AI 技能：把抽象流程畫成會動的等角小機器，適合解釋「怎麼運作」。<span class="price">免費</span></div>
+    <div class="tool"><b>Three.js</b>網頁 3D 引擎，用來做 3D 產品動畫。<span class="price">免費</span></div>
+    <div class="tool"><b>BiRefNet</b>本機去背模型，封面人像一鍵去背。<span class="price">免費</span></div>
+    <div class="tool"><b>edge-tts</b>微軟的中文語音合成，聲音自然，附每個字的時間。<span class="price">免費</span></div>
+  </div>
+  <div class="grid2">
+    <div class="panel can"><h3>能做到</h3><ul>
+      <li><strong>關鍵圖 → 圖生影片</strong>：寫實用 Kling、抽象用 Seedance，4K 豎版</li>
+      <li>純 AI 宣傳片：20 秒、6 鏡</li>
+      <li><strong>MG 動畫 B-roll</strong>：手繪線條、等軸 2.5D、扁平、HUD、玻璃擬態、包豪斯、像素、綜藝花字等 15 種風格</li>
+      <li>3D 動畫（Three.js）、等角機械流程動畫</li>
+      <li>字卡、片頭、片尾 logo、數字動畫，可輸出<strong>透明背景影片</strong>疊進剪映</li>
+      <li>照片 → 3D 模型（GLB）</li>
+      <li>封面：12 種版式模板、自動去背</li>
+      <li>中文配音（免費，附逐字時間）</li>
+    </ul></div>
+    <div class="panel cant"><h3>限制</h3><ul>
+      <li>每段只有約 4–10 秒，長片要拼接</li>
+      <li>人物臉、品牌 logo、產品細節<strong>難以完全一致</strong>；logo 要後製合成</li>
+      <li>結果隨機，要多抽幾次；定稿級影片最花錢</li>
+      <li>MG 成品寫死，改一個字要重渲染（但只要幾分鐘）</li>
+      <li>不能生成效果音，要用素材庫</li>
+      <li>同一份提示詞每次結果不同，要人審 1–2 輪</li>
+    </ul></div>
+  </div>
+  <div class="note"><b>大概花多少：</b>20 秒純 AI 宣傳片約 US$18；15 支 AI B-roll 約 US$20；MG 動畫、字卡、配音都在本機做，不花錢，只花電腦時間。</div>
+</div></section>
+
+<!-- ③ 混合 -->
+<section id="mix"><div class="wrap">
+  <div class="sec-head"><span class="num" style="color:var(--c3)">③</span><h2>混合：AI 剪輯＋生成</h2></div>
+  <p class="sub">目前最完整的用法：真人實拍當主體，AI 補鏡頭、MG 做字卡，全部組成一份剪映草稿交出去。工具就是 ① 和 ② 的組合。</p>
+  <div class="grid2">
+    <div class="panel can"><h3>能做到</h3><ul>
+      <li><strong>品牌口播</strong>：去氣口＋實拍／AI B-roll 覆蓋約一半畫面＋品牌資訊卡＋片尾 MG＋中英字幕＋配樂＋音效（每秒約 0.75 個）</li>
+      <li><strong>門店案例</strong>：店面、產品、用餐、老闆原聲＋配音＋MG 字卡，約 80 秒</li>
+      <li><strong>旅行 vlog</strong>：自錄口白＋現場聲＋歷史老照片＋字卡，5 分鐘、279 片段</li>
+      <li><strong>讀書推薦短片</strong>：口播＋5 款字卡＋轉場＋推鏡</li>
+      <li>多支同時做：一份設定檔一支片，多個 AI 分身平行處理</li>
+      <li>字幕、logo、字卡都排在 FB／IG 豎版 4:5 安全區內</li>
+    </ul></div>
+    <div class="panel cant"><h3>限制</h3><ul>
+      <li>疊加的 MG 是一段影片，在剪映裡只能移位置、改時間，不能改裡面的字</li>
+      <li>流程長：轉檔、辨識、渲染加起來每支要幾分鐘到半小時的電腦時間</li>
+      <li>真人鏡頭無縫接 AI 鏡頭（講到一半飛起來）還在規劃</li>
+      <li>開工前要先一次問清參數，不然來回修改成本高好幾倍</li>
+    </ul></div>
+  </div>
+</div></section>
+
+<!-- 案例 -->
+<section id="cases"><div class="wrap">
+  <h2>案例</h2>
+  <p class="sub">已上線的成品，附製作流程和踩坑經驗。</p>
+
+  <article class="case">
+    <div class="media">
+      <iframe class="ig" src="https://www.instagram.com/reel/DeieKPWCC-N/embed" loading="lazy" title="品牌主持人口播" allowtransparency="true" scrolling="no"></iframe>
+      <a class="ext" href="https://www.instagram.com/reel/DeieKPWCC-N/" target="_blank" rel="noopener">在 Instagram 開啟 ↗</a>
+    </div>
+    <div>
+      <span class="tag t3">③ 混合</span>
+      <h3>支付品牌・主持人口播</h3>
+      <div class="specs"><span>9:16</span><span>89 秒</span><span>178 片段</span><span>3 版共約 74 分鐘</span></div>
+      <h4>製作流程</h4>
+      <ol>
+        <li>口播錄音辨識成逐字稿，照字壓掉空白和氣口</li>
+        <li>產生中英字幕，排一張分鏡表當唯一時間來源</li>
+        <li>B-roll：商戶實拍為主，缺的用 AI 生成補</li>
+        <li>品牌資訊卡整條渲染一次，再切成單張透明影片；片尾 logo 動畫另做</li>
+        <li>寫成剪映草稿：推鏡、每刀音量、35 個音效、配樂</li>
+      </ol>
+      <h4>經驗</h4>
+      <ul>
+        <li>字卡先出 3 種樣式的比較稿讓人挑，比一次做到滿意快</li>
+        <li>開頭 0.3 秒放大＋音效當鉤子，留住滑過的人</li>
+        <li>美顏、防抖剪映自己做得好，留給人勾選</li>
+      </ul>
+    </div>
+  </article>
+
+  <article class="case">
+    <div class="media">
+      <iframe class="fb" src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1759218748694927%2F&show_text=false&width=340" loading="lazy" title="餐飲門店客戶案例" scrolling="no" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" allowfullscreen></iframe>
+      <a class="ext" href="https://www.facebook.com/reel/1759218748694927/" target="_blank" rel="noopener">在 Facebook 開啟 ↗</a>
+    </div>
+    <div>
+      <span class="tag t3">③ 混合</span>
+      <h3>餐飲門店客戶案例</h3>
+      <div class="specs"><span>9:16</span><span>80 秒</span><span>120 片段・8 軌</span><span>約 1 小時 40 分</span></div>
+      <h4>製作流程</h4>
+      <ol>
+        <li>35 段素材做成聯絡表，AI 看完挑鏡頭</li>
+        <li>老闆講話辨識成逐字稿、去空白，用字請人確認</li>
+        <li>AI 寫口白腳本 → 確認 → AI 配音（每段一個檔，方便單獨移動）</li>
+        <li>做 5 段 MG 字卡，輸出透明影片</li>
+        <li>寫成剪映草稿：實拍、配音、老闆原聲、現場音、中英字幕分軌</li>
+      </ol>
+      <h4>經驗</h4>
+      <ul>
+        <li>餐廳太吵，靜音偵測找不到空白 → 改照逐字稿的字距切</li>
+        <li>第一版配音被嫌死板 → 改口語化文案，給 4 種聲音試聽再選</li>
+        <li>零散問答 15 輪最花成本 → 之後開工前一次問完，成本降到約 1/4</li>
+      </ul>
+    </div>
+  </article>
+
+  <article class="case">
+    <div class="media">
+      <a class="linkcard" href="https://www.instagram.com/s/aGlnaGxpZ2h0OjE4NTM0ODczMjY4MDIzODA1?story_media_id=4000609677191817668" target="_blank" rel="noopener"><small>Instagram 限時動態精選</small><b>上集</b><span>點開觀看 ↗</span></a>
+      <a class="linkcard" href="https://www.instagram.com/s/aGlnaGxpZ2h0OjE4NTM0ODczMjY4MDIzODA1?story_media_id=4000609798516305378" target="_blank" rel="noopener"><small>Instagram 限時動態精選</small><b>下集</b><span>點開觀看 ↗</span></a>
+    </div>
+    <div>
+      <span class="tag t1">① AI 剪輯＋字卡</span>
+      <h3>西非餐廳 vlog（上下集）</h3>
+      <div class="specs"><span>9:16</span><span>84.8 秒</span><span>155 片段</span><span>約 23 分鐘</span></div>
+      <h4>製作流程</h4>
+      <ol>
+        <li>自己錄 137 秒口白（含 6 次重來）→ 辨識成逐字稿</li>
+        <li>刪掉重來的段落和口誤，兩輪壓停頓 → 82 秒</li>
+        <li>逐字稿對齊實際念的稿子，出中英字幕</li>
+        <li>配樂逐小節分析響度，剪成兩段，讓樂段配合內容</li>
+        <li>排 36 個鏡頭＋10 張字卡 → 剪映草稿</li>
+      </ol>
+      <h4>經驗</h4>
+      <ul>
+        <li>剪映 MCP 的關鍵幀時間基準有 bug，曾讓兩段變全黑 → 改全部硬切，轉場留給人加</li>
+        <li>辨識出的字尾時間常偏長，第一輪會漏掉停頓 → 第二輪用靜音偵測補</li>
+        <li>配樂安靜段放菜色細節、主歌段放高潮，節奏自然</li>
+      </ul>
+    </div>
+  </article>
+
+  <article class="case">
+    <div class="media">
+      <video src="assets/mg-styles.mp4" poster="assets/mg-styles-poster.jpg" autoplay muted loop playsinline preload="metadata" width="1080" height="1152"></video>
+    </div>
+    <div>
+      <span class="tag t2">② AI 生成</span>
+      <h3>MG 動畫風格合輯</h3>
+      <div class="specs"><span>每支 9:16・5 秒</span><span>16 種風格實測</span><span>15 支留用</span></div>
+      <h4>製作流程</h4>
+      <ol>
+        <li>從開源的 15 種風格提示詞出發，只換成自己的故事和配色</li>
+        <li>多個 AI 分身平行做，每批 2–3 支，各自截圖自查</li>
+        <li>渲染成 5 秒直版，人看過再修第二版</li>
+        <li>留用的寫進素材庫，附關鍵詞，口播剪輯時自動取用</li>
+      </ol>
+      <h4>經驗</h4>
+      <ul>
+        <li>太抽象會被退（純色塊「看不出畫什麼」），要讓產品本身現身</li>
+        <li>3D 用 Three.js（渲染 46 秒）勝過 Blender（22 分鐘還被嫌粗糙）</li>
+        <li>先出 v1 給人看再修，比一次追求完美划算</li>
+      </ul>
+    </div>
+  </article>
+</div></section>
+
+<!-- 工具與模板 -->
+<section id="kit"><div class="wrap">
+  <h2>工具與模板</h2>
+  <p class="sub">模板＝填一張表就能重複出片的流程（腳本骨架＋程式＋已知坑）。</p>
+  <div class="scroll"><table class="tbl">
+    <thead><tr><th>名稱</th><th>類別</th><th>用途</th><th>狀態</th></tr></thead>
+    <tbody>
+      <tr><td>品牌口播模板</td><td>③</td><td>真人口播＋B-roll＋資訊卡＋片尾 MG，9:16，65–90 秒</td><td class="st ok">✅ 已用 4 支</td></tr>
+      <tr><td>客戶案例 v1</td><td>③</td><td>品牌介紹→數字→路線→方案→金句，9:16，40 秒，中英版</td><td class="st ok">✅</td></tr>
+      <tr><td>門店案例 v2</td><td>③</td><td>餐飲門店 80 秒，老闆原聲＋配音＋中英字幕，輸出剪映草稿</td><td class="st ok">✅</td></tr>
+      <tr><td>旅行快剪 30s</td><td>①</td><td>音樂卡點三種節奏（定場漸快／等距／海報），固定字卡</td><td class="st ok">✅</td></tr>
+      <tr><td>vlog 長片粗剪流程</td><td>①</td><td>看全部素材→腳本→剪映草稿，16:9，3–5 分鐘</td><td class="st ok">✅ 5 支</td></tr>
+      <tr><td>讀書推薦短片流程</td><td>③</td><td>作者簡介＋心得＋引文，2–3 分鐘，豎版</td><td class="st ok">✅ 1 支</td></tr>
+      <tr><td>MG B-roll 素材庫</td><td>②</td><td>15 支 5 秒 MG 動畫，依口播關鍵詞取用</td><td class="st ok">✅</td></tr>
+      <tr><td>封面模板</td><td>②</td><td>12 種 vlog／YouTube 封面版式＋去背；口播封面 4 款</td><td class="st ok">✅</td></tr>
+      <tr><td>素材索引</td><td>—</td><td>音樂、音效、實拍、AI 影片寫成索引，AI 自己挑素材</td><td class="st ok">✅</td></tr>
+      <tr><td><a href="glossary/">剪輯術語目錄</a></td><td>—</td><td>168 個術語，附可播放範例與各工具指令寫法</td><td class="st ok">✅ 線上看</td></tr>
+      <tr><td>ChatCut 口播流程</td><td>①</td><td>逐字稿剪輯，人和 AI 共用時間軸</td><td class="st wait">⏳ 未實測</td></tr>
+    </tbody>
+  </table></div>
+</div></section>
+
+<!-- 數字 -->
+<section id="numbers"><div class="wrap">
+  <h2>越做越便宜</h2>
+  <p class="sub">每做出 1 秒成片，AI 要處理多少 token。流程固定、開工前一次問清楚之後，成本降到原本約 1/30。</p>
+  <div class="bars">
+    <div class="bar"><span>AI 宣傳片</span><div class="track"><div class="fill" style="width:100%"></div></div><span class="val">227 萬</span></div>
+    <div class="bar"><span>第一支客戶案例</span><div class="track"><div class="fill" style="width:28.6%"></div></div><span class="val">65 萬</span></div>
+    <div class="bar"><span>第一支口播</span><div class="track"><div class="fill" style="width:22.9%"></div></div><span class="val">52 萬</span></div>
+    <div class="bar"><span>門店案例</span><div class="track"><div class="fill" style="width:18.1%"></div></div><span class="val">41 萬</span></div>
+    <div class="bar"><span>餐廳 vlog</span><div class="track"><div class="fill" style="width:4.4%"></div></div><span class="val">10 萬</span></div>
+    <div class="bar"><span>5 分鐘旅遊 vlog</span><div class="track"><div class="fill" style="width:3%"></div></div><span class="val">6.7 萬</span></div>
+  </div>
+  <div class="cards" style="margin-top:28px">
+    <div class="card"><h3>約 15 倍</h3><p class="muted">素材先轉 H.264、用指令列渲染，41 秒影片從 26 分鐘降到 1 分 45 秒。</p></div>
+    <div class="card"><h3>十幾秒</h3><p class="muted">建一份 279 片段的剪映草稿。真正花時間的是渲染動畫和等 AI 生成。</p></div>
+    <div class="card"><h3>US$0</h3><p class="muted">剪映 MCP＋HyperFrames＋本機配音，整條流程不花錢；只有 AI 生成畫面要付費。</p></div>
+  </div>
+</div></section>
+
+<!-- 更新紀錄 -->
+<section id="log"><div class="wrap">
+  <h2>更新紀錄</h2>
+  <ul class="log">
+    <li><time>2026-10-16</time>首次公開：工作流、AI 怎麼看片、三類做法、4 個案例、工具與模板、成本數字、剪輯術語目錄。</li>
+  </ul>
+</div></section>
+
+</main>
+
+<footer><div class="wrap">
+  研究工具：Claude Code · 剪映 MCP（jianying-local-mcp）· HyperFrames · Higgsfield · ChatCut。案例文字已匿名化。
+</div></footer>
+
+<script>
+// 深淺色切換（記在本機）
+const btn = document.getElementById('themeBtn');
+try { const t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch(e){}
+btn.addEventListener('click', () => {
+  const dark = document.documentElement.dataset.theme
+    ? document.documentElement.dataset.theme === 'dark'
+    : matchMedia('(prefers-color-scheme: dark)').matches;
+  const next = dark ? 'light' : 'dark';
+  document.documentElement.dataset.theme = next;
+  try { localStorage.setItem('theme', next); } catch(e){}
+});
+</script>
+</body>
+</html>
