@@ -116,6 +116,9 @@ section{padding:48px 0;border-top:1px solid var(--line)}
 .case iframe.ig{height:620px}
 .case iframe.fb{aspect-ratio:9/16;height:auto}
 .case video{width:100%;height:auto;max-width:340px;border-radius:12px;display:block}
+.case .media.grid4{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-content:start;max-width:340px;width:100%;justify-self:center}
+.case .media.grid4 figure{margin:0}
+.case .media.grid4 figcaption{font-size:.78rem;color:var(--muted);text-align:center;margin-top:2px}
 .case h3{font-size:1.3rem;margin:4px 0 6px}
 .specs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
 .specs span{font-size:.8rem;border:1px solid var(--line);border-radius:99px;padding:0 10px}
@@ -169,9 +172,9 @@ footer{padding:40px 0 60px;color:var(--muted);font-size:.85rem;border-top:1px so
   <h1>AI 自動剪輯研究</h1>
   <p class="lead">讓 AI 剪片，但剪完人還能改：不直接輸出死的 mp4，而是讓 Claude 寫出<strong>剪映原生草稿</strong>，打開剪映就能逐段、逐字幕修改，最後手動導出。</p>
   <div class="meta">
-    <span class="pill">最後更新 <b id="updated">2026-10-16</b></span>
+    <span class="pill">最後更新 <b id="updated">2026-10-26</b></span>
     <span class="pill">研究起始 2026-09-28</span>
-    <span class="pill">完成約 20 個實作專案</span>
+    <span class="pill">完成約 30 個實作專案</span>
     <a class="pill" href="glossary/">剪輯術語目錄 168 條 →</a>
   </div>
 </header>
@@ -269,6 +272,7 @@ footer{padding:40px 0 60px;color:var(--muted);font-size:.85rem;border-top:1px so
       <li>讀不了剪映自己存的加密草稿，所以不能「人先粗剪、AI 接手」</li>
       <li>沒有曲線變速、自動卡點；剪映會員素材不能用</li>
       <li>素材要本機路徑；帶旋轉資訊的手機影片要先轉正</li>
+      <li>剪映的位置關鍵幀要 <strong>X＋Y 成對寫</strong>，只寫一個方向會逐格跳、看起來像閃頻；自製預覽看不出來，新效果要先在剪映裡試 3 秒</li>
     </ul></div>
   </div>
 </div></section>
@@ -285,10 +289,13 @@ footer{padding:40px 0 60px;color:var(--muted);font-size:.85rem;border-top:1px so
     <div class="tool"><b>Three.js</b>網頁 3D 引擎，用來做 3D 產品動畫。<span class="price">免費</span></div>
     <div class="tool"><b>BiRefNet</b>本機去背模型，封面人像一鍵去背。<span class="price">免費</span></div>
     <div class="tool"><b>edge-tts</b>微軟的中文語音合成，聲音自然，附每個字的時間。<span class="price">免費</span></div>
+    <div class="tool"><b>ElevenLabs</b>AI 配音，台灣腔、年輕聲線選擇多；給客戶的廣告改用它。<span class="price">需付費</span></div>
   </div>
   <div class="grid2">
     <div class="panel can"><h3>能做到</h3><ul>
-      <li><strong>關鍵圖 → 圖生影片</strong>：寫實用 Kling、抽象用 Seedance，4K 豎版</li>
+      <li><strong>關鍵圖 → 圖生影片</strong>：產品鏡用 Kling、抽象用 Seedance，4K 豎版</li>
+      <li><strong>人物生活鏡</strong>：MiniMax 只給第一幀、讓它自己演，比給首尾幀自然（首尾幀版人物容易糊、僵）</li>
+      <li><strong>產品不變形</strong>：實拍產品去背 → 放深灰底 → AI 只重打光，再當首尾幀做轉動</li>
       <li>純 AI 宣傳片：20 秒、6 鏡</li>
       <li><strong>MG 動畫 B-roll</strong>：手繪線條、等軸 2.5D、扁平、HUD、玻璃擬態、包豪斯、像素、綜藝花字等 15 種風格</li>
       <li>3D 動畫（Three.js）、等角機械流程動畫</li>
@@ -304,9 +311,10 @@ footer{padding:40px 0 60px;color:var(--muted);font-size:.85rem;border-top:1px so
       <li>MG 成品寫死，改一個字要重渲染（但只要幾分鐘）</li>
       <li>不能生成效果音，要用素材庫</li>
       <li>同一份提示詞每次結果不同，要人審 1–2 輪</li>
+      <li>一支 3 秒撐不住長句；從同一支後段再取一段會「動作重播」，要整支慢放或多生一個角度</li>
     </ul></div>
   </div>
-  <div class="note"><b>大概花多少：</b>20 秒純 AI 宣傳片約 US$18；15 支 AI B-roll 約 US$20；MG 動畫、字卡、配音都在本機做，不花錢，只花電腦時間。</div>
+  <div class="note"><b>大概花多少：</b>20 秒純 AI 宣傳片約 US$18；15 支 AI B-roll 約 US$20；30–45 秒的 AI 情境廣告每款約 US$7–15（每秒成片約 US$0.26–0.37）。MG 動畫、字卡都在本機做，不花錢，只花電腦時間。</div>
 </div></section>
 
 <!-- ③ 混合 -->
@@ -319,6 +327,10 @@ footer{padding:40px 0 60px;color:var(--muted);font-size:.85rem;border-top:1px so
       <li><strong>門店案例</strong>：店面、產品、用餐、老闆原聲＋配音＋MG 字卡，約 80 秒</li>
       <li><strong>旅行 vlog</strong>：自錄口白＋現場聲＋歷史老照片＋字卡，5 分鐘、279 片段</li>
       <li><strong>讀書推薦短片</strong>：口播＋5 款字卡＋轉場＋推鏡</li>
+      <li><strong>產品情境廣告</strong>：AI 人物＋實拍產品＋燈光蒙版轉場＋規格動畫，30–45 秒</li>
+      <li><strong>App 操作解說</strong>：真人去背換背景＋手機錄屏推近＋按鈕強調框，口播對錄屏接近 100%</li>
+      <li><strong>橫拍轉豎版</strong>：橫的素材做上下分屏、滑入，照樣出 9:16</li>
+      <li><strong>展覽 vlog</strong>：口播＋實拍＋16 張 MG＋80 個音效，2 分半</li>
       <li>多支同時做：一份設定檔一支片，多個 AI 分身平行處理</li>
       <li>字幕、logo、字卡都排在 FB／IG 豎版 4:5 安全區內</li>
     </ul></div>
@@ -335,6 +347,115 @@ footer{padding:40px 0 60px;color:var(--muted);font-size:.85rem;border-top:1px so
 <section id="cases"><div class="wrap">
   <h2>案例</h2>
   <p class="sub">已上線的成品，附製作流程和踩坑經驗。</p>
+
+  <article class="case">
+    <div class="media grid4">
+      <figure><video src="assets/lighting-p1.mp4" poster="assets/lighting-p1.jpg" controls muted playsinline preload="metadata" width="720" height="1280"></video><figcaption>吸頂燈・一天的光</figcaption></figure>
+      <figure><video src="assets/lighting-p2.mp4" poster="assets/lighting-p2.jpg" controls muted playsinline preload="metadata" width="720" height="1280"></video><figcaption>吸頂燈・一家人</figcaption></figure>
+      <figure><video src="assets/lighting-p4.mp4" poster="assets/lighting-p4.jpg" controls muted playsinline preload="metadata" width="720" height="1280"></video><figcaption>嵌燈・服裝店</figcaption></figure>
+      <figure><video src="assets/lighting-p5.mp4" poster="assets/lighting-p5.jpg" controls muted playsinline preload="metadata" width="720" height="1280"></video><figcaption>嵌燈・第一間店</figcaption></figure>
+    </div>
+    <div>
+      <span class="tag t3">③ 混合</span>
+      <h3>燈具品牌廣告（4 款）</h3>
+      <div class="specs"><span>9:16</span><span>29–45 秒</span><span>每款約 3–4 小時</span><span>AI 生成每款 US$7–15</span></div>
+      <h4>製作流程</h4>
+      <ol>
+        <li>客戶給產品照和規格 → AI 寫口播腳本，數字一字不改</li>
+        <li>人物定裝（臉、全身、合照）→ 每鏡關鍵圖，人在分鏡表上註解，改 3–7 輪</li>
+        <li>產品鏡：實拍去背、深灰底、AI 只重打光，再做轉動；人物生活鏡只給第一幀讓 AI 演</li>
+        <li>付費 AI 配音只剪氣口不加速，每句起點＝鏡頭起點</li>
+        <li>以燈為圓心的圓形蒙版做換場、規格做成透明動畫、原生字幕 → 剪映草稿</li>
+      </ol>
+      <h4>經驗</h4>
+      <ul>
+        <li>第一版客戶打 2.5／5：開頭不夠直接、配音不像台灣人 → 改成講給一般消費者聽、換配音、產品提前到第 2 鏡</li>
+        <li>約 3 成積分花在被改掉的關鍵圖 → 下一款先出四格草稿，選定才出 4K</li>
+        <li>燈的亮暗切換不靠 AI 生成，用蒙版分割同一個畫面，燈形才不會跑</li>
+      </ul>
+    </div>
+  </article>
+
+  <article class="case">
+    <div class="media">
+      <iframe class="fb" src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1681654980195115%2F&show_text=false&width=340" loading="lazy" title="App 操作解說" scrolling="no" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" allowfullscreen></iframe>
+      <a class="ext" href="https://www.facebook.com/reel/1681654980195115/" target="_blank" rel="noopener">在 Facebook 開啟 ↗</a>
+    </div>
+    <div>
+      <span class="tag t3">③ 混合</span>
+      <h3>App 操作解說（真人＋錄屏）</h3>
+      <div class="specs"><span>9:16</span><span>3 支，1–3.7 分鐘</span><span>約 5 小時（含 3 輪改版、9 張封面）</span></div>
+      <h4>製作流程</h4>
+      <ol>
+        <li>口播辨識成逐字稿，每句配一段錄屏，用畫面換頁的時間點對齊</li>
+        <li>素牆前拍的真人逐幀去背，換成品牌背景</li>
+        <li>錄屏推近：同一套公式算出剪映關鍵幀和強調框座標，框一定落在按鈕上</li>
+        <li>MG 拆成強調框／點擊／名卡三層，各自一軌</li>
+        <li>寫成剪映草稿，人只要微調少數字卡位置</li>
+      </ol>
+      <h4>經驗</h4>
+      <ul>
+        <li>口播對錄屏接近 100%，3 支只有 4 個點要手修</li>
+        <li>不要相信錄屏檔名的時間（差了 35 秒），要看畫面切換點</li>
+        <li>錄屏時開「觸控圓點」，對位一眼就看出手指點哪</li>
+        <li>去背和 MG 渲染不要同時跑，會慢 3 倍</li>
+      </ul>
+    </div>
+  </article>
+
+  <article class="case">
+    <div class="media">
+      <iframe class="fb" src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Freel%2F1153505030538879%2F&show_text=false&width=340" loading="lazy" title="英文客戶案例" scrolling="no" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" allowfullscreen></iframe>
+      <a class="ext" href="https://www.facebook.com/reel/1153505030538879/" target="_blank" rel="noopener">在 Facebook 開啟 ↗</a>
+    </div>
+    <div>
+      <span class="tag t3">③ 混合</span>
+      <h3>英文客戶案例・橫轉豎分屏</h3>
+      <div class="specs"><span>9:16</span><span>28.7 秒</span><span>3 版</span><span>附封面、海報、喜報</span></div>
+      <h4>製作流程</h4>
+      <ol>
+        <li>英文 AI 配音：先砍字數，不靠加速塞進時長</li>
+        <li>橫拍的店內素材做成上下分屏、滑入，出 9:16</li>
+        <li>前 1.5 秒快切＋大字當鉤子；片尾放真 logo 光點聚合動畫</li>
+        <li>中英字幕、配樂避讓人聲 → 剪映草稿；同一批素材再出封面、海報、喜報</li>
+      </ol>
+      <h4>經驗</h4>
+      <ul>
+        <li>剪映裡畫面一直閃：只寫了 X 位置關鍵幀 → 改 X＋Y 成對才好；用 3 秒測試草稿 A/B 對照才確認</li>
+        <li>閃頻還有另一個來源：素材本身的燈光和自動曝光，選片前要先掃</li>
+        <li>配樂要壓到人聲下 12 LU 以上；有人聲的配樂換純音樂版</li>
+        <li>第一版沒等確認就動手被打回 → 流程先於技術</li>
+      </ul>
+    </div>
+  </article>
+
+  <article class="case">
+    <div class="media">
+      <iframe class="ig" src="https://www.instagram.com/reel/DeovZYLEemw/embed" loading="lazy" title="博物館展覽 vlog" allowtransparency="true" scrolling="no"></iframe>
+      <a class="ext" href="https://www.instagram.com/reel/DeovZYLEemw/" target="_blank" rel="noopener">在 Instagram 開啟 ↗</a>
+    </div>
+    <div>
+      <span class="tag t1">① AI 剪輯＋字卡</span>
+      <h3>博物館展覽 vlog</h3>
+      <div class="specs"><span>9:16</span><span>2 分 26 秒</span><span>380 片段</span><span>約 3 小時</span></div>
+      <h4>製作流程</h4>
+      <ol>
+        <li>自錄口播辨識成逐字稿，刪掉重錄，句間停頓壓到約 0.1 秒（不變速）</li>
+        <li>60 個鏡頭：現場實拍＋展品照片，照片緩推或左右搖</li>
+        <li>16 張 MG：窟號標題卡、數字跳動、彩塑依序亮起，輸出透明影片</li>
+        <li>轉場混用：段落開頭快速推近、照片疊化、其餘硬切</li>
+        <li>中英字幕＋81 個音效 → 剪映草稿</li>
+      </ol>
+      <h4>經驗</h4>
+      <ul>
+        <li>手機在暗處拍會閃、也不能慢放 → 展覽改用相機拍</li>
+        <li>辨識把「3 個」聽成「13 個」→ 字幕照稿子寫，有疑問的列成清單請人確認</li>
+        <li>第二版要求更緊湊、MG 加量、音效加多：每秒約 0.55 個音效</li>
+      </ul>
+    </div>
+  </article>
+
+
 
   <article class="case">
     <div class="media">
@@ -452,6 +573,11 @@ footer{padding:40px 0 60px;color:var(--muted);font-size:.85rem;border-top:1px so
       <tr><td>旅行快剪 30s</td><td>①</td><td>音樂卡點三種節奏（定場漸快／等距／海報），固定字卡</td><td class="st ok">✅</td></tr>
       <tr><td>vlog 長片粗剪流程</td><td>①</td><td>看全部素材→腳本→剪映草稿，16:9，3–5 分鐘</td><td class="st ok">✅ 5 支</td></tr>
       <tr><td>讀書推薦短片流程</td><td>③</td><td>作者簡介＋心得＋引文，2–3 分鐘，豎版</td><td class="st ok">✅ 1 支</td></tr>
+      <tr><td>產品情境廣告</td><td>③</td><td>AI 人物＋實拍產品重打光＋燈光蒙版轉場＋規格動畫，9:16，30–45 秒</td><td class="st ok">✅ 已用 4 款</td></tr>
+      <tr><td>英文客戶案例 v3</td><td>③</td><td>英文 AI 口播＋橫轉豎分屏＋鉤子＋片尾 logo，附封面／海報／喜報</td><td class="st ok">✅</td></tr>
+      <tr><td>App 操作解說</td><td>③</td><td>真人去背開頭結尾＋錄屏推近＋強調框／點擊／名卡三層 MG</td><td class="st ok">✅ 已用 3 支</td></tr>
+      <tr><td>展覽 vlog</td><td>①</td><td>開場→簡介→重點展品→資訊總結，MG 標題卡＋中英字幕＋音效</td><td class="st ok">✅</td></tr>
+      <tr><td>收款播報短片</td><td>③</td><td>無口播 20 秒，找出播報聲＋聲波動畫＋金額字卡</td><td class="st ok">✅</td></tr>
       <tr><td>MG B-roll 素材庫</td><td>②</td><td>15 支 5 秒 MG 動畫，依口播關鍵詞取用</td><td class="st ok">✅</td></tr>
       <tr><td>封面模板</td><td>②</td><td>12 種 vlog／YouTube 封面版式＋去背；口播封面 4 款</td><td class="st ok">✅</td></tr>
       <tr><td>素材索引</td><td>—</td><td>音樂、音效、實拍、AI 影片寫成索引，AI 自己挑素材</td><td class="st ok">✅</td></tr>
@@ -476,7 +602,8 @@ footer{padding:40px 0 60px;color:var(--muted);font-size:.85rem;border-top:1px so
   <div class="cards" style="margin-top:28px">
     <div class="card"><h3>約 15 倍</h3><p class="muted">素材先轉 H.264、用指令列渲染，41 秒影片從 26 分鐘降到 1 分 45 秒。</p></div>
     <div class="card"><h3>十幾秒</h3><p class="muted">建一份 279 片段的剪映草稿。真正花時間的是渲染動畫和等 AI 生成。</p></div>
-    <div class="card"><h3>US$0</h3><p class="muted">剪映 MCP＋HyperFrames＋本機配音，整條流程不花錢；只有 AI 生成畫面要付費。</p></div>
+    <div class="card"><h3>US$0</h3><p class="muted">剪映 MCP＋HyperFrames＋本機配音，剪輯和動畫不花錢；要付費的只有 AI 生成畫面，和給客戶廣告用的 AI 配音。</p></div>
+    <div class="card"><h3>US$0.26–0.37</h3><p class="muted">AI 情境廣告每做 1 秒成片的生成費。約 3 成花在被改掉的關鍵圖，先出草稿確認可再省。</p></div>
   </div>
 </div></section>
 
@@ -484,6 +611,7 @@ footer{padding:40px 0 60px;color:var(--muted);font-size:.85rem;border-top:1px so
 <section id="log"><div class="wrap">
   <h2>更新紀錄</h2>
   <ul class="log">
+    <li><time>2026-10-26</time>新增 4 個案例（燈具廣告 4 款、App 操作解說、英文客戶案例、博物館展覽 vlog）、5 個模板、AI 生成新做法與成本數字。</li>
     <li><time>2026-10-16</time>首次公開：工作流、AI 怎麼看片、三類做法、4 個案例、工具與模板、成本數字、剪輯術語目錄。</li>
   </ul>
 </div></section>
