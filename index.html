@@ -119,6 +119,7 @@ section{padding:48px 0;border-top:1px solid var(--line)}
 .case .media.grid4{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-content:start;max-width:340px;width:100%;justify-self:center}
 .case .media.grid4 figure{margin:0}
 .case .media.grid4 figcaption{font-size:.78rem;color:var(--muted);text-align:center;margin-top:2px}
+.case .media.grid4 img{width:100%;height:auto;border-radius:10px;display:block}
 .case h3{font-size:1.3rem;margin:4px 0 6px}
 .specs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}
 .specs span{font-size:.8rem;border:1px solid var(--line);border-radius:99px;padding:0 10px}
@@ -172,7 +173,7 @@ footer{padding:40px 0 60px;color:var(--muted);font-size:.85rem;border-top:1px so
   <h1>AI 自動剪輯研究</h1>
   <p class="lead">讓 AI 剪片，但剪完人還能改：不直接輸出死的 mp4，而是讓 Claude 寫出<strong>剪映原生草稿</strong>，打開剪映就能逐段、逐字幕修改，最後手動導出。</p>
   <div class="meta">
-    <span class="pill">最後更新 <b id="updated">2026-10-26</b></span>
+    <span class="pill">最後更新 <b id="updated">2026-10-30</b></span>
     <span class="pill">研究起始 2026-09-28</span>
     <span class="pill">完成約 30 個實作專案</span>
     <a class="pill" href="glossary/">剪輯術語目錄 168 條 →</a>
@@ -303,6 +304,12 @@ footer{padding:40px 0 60px;color:var(--muted);font-size:.85rem;border-top:1px so
       <li>照片 → 3D 模型（GLB）</li>
       <li>封面：12 種版式模板、自動去背</li>
       <li>中文配音（免費，附逐字時間）</li>
+      <li><strong>純產品動畫</strong>：不用人物，產品特寫、轉動、微距＋MG 規格標註，15 秒一支</li>
+      <li><strong>分解爆炸圖</strong>：零件沿一條軸拆開，再倒放就是組回去</li>
+      <li><strong>開關燈、換光色</strong>：同一張圖只改光做出多個版本，本機用蒙版切換，時間準、燈形不跑</li>
+      <li><strong>先出便宜草稿再出 4K</strong>：草稿圖 1.5 點一張，選好才出正式圖</li>
+      <li><strong>平台內建動態範本</strong>：丟一張產品照，一鍵出爆炸、X 光透視、微距環繞等動態</li>
+      <li><strong>借範本的光影出效果圖</strong>：把範本的範例圖當風格參考，換成自己的產品</li>
     </ul></div>
     <div class="panel cant"><h3>限制</h3><ul>
       <li>每段只有約 4–10 秒，長片要拼接</li>
@@ -312,9 +319,13 @@ footer{padding:40px 0 60px;color:var(--muted);font-size:.85rem;border-top:1px so
       <li>不能生成效果音，要用素材庫</li>
       <li>同一份提示詞每次結果不同，要人審 1–2 輪</li>
       <li>一支 3 秒撐不住長句；從同一支後段再取一段會「動作重播」，要整支慢放或多生一個角度</li>
+      <li>給首尾兩張圖做轉動，角度差到 180° 會在後段直接跳切，每段最好 90° 以內</li>
+      <li>明明寫了「燈關著」，AI 還是可能自己把燈點亮</li>
+      <li>會自己加字的動態範本，字常常寫錯（例如兩個標籤都寫成同一個色溫）</li>
+      <li>內建範本要送出才知道價格，同一平台每支差到 1.5 倍</li>
     </ul></div>
   </div>
-  <div class="note"><b>大概花多少：</b>20 秒純 AI 宣傳片約 US$18；15 支 AI B-roll 約 US$20；30–45 秒的 AI 情境廣告每款約 US$7–15（每秒成片約 US$0.26–0.37）。MG 動畫、字卡都在本機做，不花錢，只花電腦時間。</div>
+  <div class="note"><b>大概花多少：</b>20 秒純 AI 宣傳片約 US$18；15 支 AI B-roll 約 US$20；30–45 秒的 AI 情境廣告每款約 US$7–15（每秒成片約 US$0.26–0.37）；15 秒純產品動畫兩支約 US$4.7（每秒約 US$0.16）；內建動態範本每支約 US$1.1–1.6；4K 效果圖每張約 US$0.09。MG 動畫、字卡都在本機做，不花錢，只花電腦時間。</div>
 </div></section>
 
 <!-- ③ 混合 -->
@@ -372,6 +383,88 @@ footer{padding:40px 0 60px;color:var(--muted);font-size:.85rem;border-top:1px so
         <li>第一版客戶打 2.5／5：開頭不夠直接、配音不像台灣人 → 改成講給一般消費者聽、換配音、產品提前到第 2 鏡</li>
         <li>約 3 成積分花在被改掉的關鍵圖 → 下一款先出四格草稿，選定才出 4K</li>
         <li>燈的亮暗切換不靠 AI 生成，用蒙版分割同一個畫面，燈形才不會跑</li>
+      </ul>
+    </div>
+  </article>
+
+  <article class="case">
+    <div class="media grid4">
+      <figure><video src="assets/product-anim-a.mp4" poster="assets/product-anim-a.jpg" controls playsinline preload="metadata" width="720" height="1280"></video><figcaption>特寫版（暗黑）</figcaption></figure>
+      <figure><video src="assets/product-anim-b.mp4" poster="assets/product-anim-b.jpg" controls playsinline preload="metadata" width="720" height="1280"></video><figcaption>爆炸版（淺灰）</figcaption></figure>
+    </div>
+    <div>
+      <span class="tag t2">② AI 生成</span>
+      <h3>軌道燈產品動畫・特寫版／爆炸版</h3>
+      <div class="specs"><span>9:16</span><span>15 秒 × 2</span><span>約 1.2 小時</span><span>AI 生成 US$4.7</span></div>
+      <h4>製作流程</h4>
+      <ol>
+        <li>看 5 支參考影片＋21 張實拍照，寫兩版腳本：暗黑特寫、淺灰爆炸</li>
+        <li>每鏡先出 2 張便宜草稿（1.5 點一張），人挑好才出 4K</li>
+        <li>同一張圖只改光，做出關燈／三種色溫／小夜燈多個版本</li>
+        <li>AI 只負責動作：微距滑過、燈頭俯仰、轉動、拆開，共 4 支</li>
+        <li>開關燈、換色、光閃、推鏡、倒放組回、MG 標註全在本機合成 → 剪映草稿，配樂＋音效</li>
+      </ol>
+      <h4>經驗</h4>
+      <ul>
+        <li>從背面轉到正面（180°），AI 在第 4 秒直接跳切 → 只用前段，接一道光閃切到正面</li>
+        <li>寫了「燈關著」，AI 拆解時還是把燈點亮 → 乾脆改腳本：亮燈 → 拆開 → 組回</li>
+        <li>AI 畫背面孔數會錯（4 孔畫成 6 孔）→ 改用實拍照只換背景、重打光，一次就對</li>
+        <li>先出草稿再出 4K，這款每秒成本比之前的燈具廣告低一半</li>
+      </ul>
+    </div>
+  </article>
+
+  <article class="case">
+    <div class="media grid4">
+      <figure><video src="assets/preset-exploded-2.mp4" poster="assets/preset-exploded-2.jpg" controls muted playsinline preload="metadata" width="720" height="1280"></video><figcaption>爆炸循環・深杯嵌燈</figcaption></figure>
+      <figure><video src="assets/preset-exploded-1.mp4" poster="assets/preset-exploded-1.jpg" controls muted playsinline preload="metadata" width="720" height="1280"></video><figcaption>爆炸循環・石膏嵌燈</figcaption></figure>
+      <figure><video src="assets/preset-xray.mp4" poster="assets/preset-xray.jpg" controls muted playsinline preload="metadata" width="720" height="1280"></video><figcaption>X 光透視・透明罩</figcaption></figure>
+      <figure><video src="assets/preset-macro-orbit.mp4" poster="assets/preset-macro-orbit.jpg" controls muted playsinline preload="metadata" width="720" height="1280"></video><figcaption>微距環繞・軌道燈</figcaption></figure>
+      <figure><video src="assets/preset-callouts.mp4" poster="assets/preset-callouts.jpg" controls muted playsinline preload="metadata" width="720" height="1280"></video><figcaption>⚠ 規格標註（字寫錯）</figcaption></figure>
+    </div>
+    <div>
+      <span class="tag t2">② AI 生成</span>
+      <h3>平台內建動態範本 × 5 款燈具</h3>
+      <div class="specs"><span>9:16</span><span>6.6–15 秒</span><span>每支 US$1.1–1.6</span><span>只需一張產品照</span></div>
+      <h4>製作流程</h4>
+      <ol>
+        <li>在平台的範本庫挑出適合產品、工業品的動態（爆炸、X 光、微距環繞、標註），列成附預覽連結的清單</li>
+        <li>不適合燈具的（霓虹、人像、美妝食品風）移出清單</li>
+        <li>5 款燈具各配一個範本，用既有的去背產品照直接送出</li>
+      </ol>
+      <h4>經驗</h4>
+      <ul>
+        <li><strong>只動產品、不加字的範本最穩</strong>：爆炸循環最便宜、外形最一致，可直接當 B-roll</li>
+        <li>會自己加字的「規格標註」範本是反面教材：兩個標籤都寫成 6000K、中間一格字糊掉</li>
+        <li>範本要送出才知道價格：第一支 36 點，後面 54 點，照第一支估算導致最後一支點數不夠</li>
+        <li>拆解、透視看到的內部零件是 AI 想像的，只能當示意</li>
+      </ul>
+    </div>
+  </article>
+
+  <article class="case">
+    <div class="media grid4">
+      <figure><img src="assets/poster-1.jpg" alt="霧面吸頂燈・斜陽光斑" loading="lazy" width="1080" height="1341"><figcaption>斜陽光斑</figcaption></figure>
+      <figure><img src="assets/poster-2.jpg" alt="透明罩吸頂燈・暖光柱" loading="lazy" width="1080" height="1341"><figcaption>暖光柱</figcaption></figure>
+      <figure><img src="assets/poster-3.jpg" alt="軌道燈・黑白硬影" loading="lazy" width="1080" height="1341"><figcaption>黑白硬影</figcaption></figure>
+      <figure><img src="assets/poster-4.jpg" alt="石膏嵌燈・灰泥台座葉影" loading="lazy" width="1080" height="1341"><figcaption>灰泥台座＋葉影</figcaption></figure>
+      <figure><img src="assets/poster-5.jpg" alt="深杯嵌燈・方塊台座斜陽" loading="lazy" width="1080" height="1341"><figcaption>方塊台座＋斜陽</figcaption></figure>
+    </div>
+    <div>
+      <span class="tag t2">② AI 生成</span>
+      <h3>無字效果圖 × 5 種光影</h3>
+      <div class="specs"><span>4:5</span><span>4K</span><span>每張 US$0.09</span><span>5 張共 15 點</span></div>
+      <h4>製作流程</h4>
+      <ol>
+        <li>從平台的「產品照」範本挑 5 種適合燈具的光影：斜陽光斑、暖光柱、黑白硬影、灰泥台座、方塊台座</li>
+        <li>不直接跑範本，而是把範本的範例圖匯入（免費）當風格參考</li>
+        <li>範例圖＋自家產品照 → 一般生圖模型出 4K，指定燈面微亮暖光、上方留白給標題</li>
+      </ol>
+      <h4>經驗</h4>
+      <ul>
+        <li>借範例圖的光影，比直接跑範本便宜很多，價格也固定</li>
+        <li>範例圖上的商品都有字，提示詞要寫明「不要任何文字」，出圖後逐張放大檢查</li>
+        <li>其中一張產品沒置中，點數用完沒能重生 → 本機裁切補救</li>
       </ul>
     </div>
   </article>
@@ -574,6 +667,8 @@ footer{padding:40px 0 60px;color:var(--muted);font-size:.85rem;border-top:1px so
       <tr><td>vlog 長片粗剪流程</td><td>①</td><td>看全部素材→腳本→剪映草稿，16:9，3–5 分鐘</td><td class="st ok">✅ 5 支</td></tr>
       <tr><td>讀書推薦短片流程</td><td>③</td><td>作者簡介＋心得＋引文，2–3 分鐘，豎版</td><td class="st ok">✅ 1 支</td></tr>
       <tr><td>產品情境廣告</td><td>③</td><td>AI 人物＋實拍產品重打光＋燈光蒙版轉場＋規格動畫，9:16，30–45 秒</td><td class="st ok">✅ 已用 4 款</td></tr>
+      <tr><td>產品動畫雙版</td><td>②</td><td>純產品＋MG、無人物：暗黑特寫版／淺灰爆炸版，各 15 秒，輸出剪映草稿</td><td class="st ok">✅ 已用 1 款</td></tr>
+      <tr><td>產品／燈光範本清單</td><td>②</td><td>平台內建圖片與動態範本，依燈光、拆解、工業分類，附 37 個預覽連結</td><td class="st ok">✅</td></tr>
       <tr><td>英文客戶案例 v3</td><td>③</td><td>英文 AI 口播＋橫轉豎分屏＋鉤子＋片尾 logo，附封面／海報／喜報</td><td class="st ok">✅</td></tr>
       <tr><td>App 操作解說</td><td>③</td><td>真人去背開頭結尾＋錄屏推近＋強調框／點擊／名卡三層 MG</td><td class="st ok">✅ 已用 3 支</td></tr>
       <tr><td>展覽 vlog</td><td>①</td><td>開場→簡介→重點展品→資訊總結，MG 標題卡＋中英字幕＋音效</td><td class="st ok">✅</td></tr>
@@ -604,6 +699,7 @@ footer{padding:40px 0 60px;color:var(--muted);font-size:.85rem;border-top:1px so
     <div class="card"><h3>十幾秒</h3><p class="muted">建一份 279 片段的剪映草稿。真正花時間的是渲染動畫和等 AI 生成。</p></div>
     <div class="card"><h3>US$0</h3><p class="muted">剪映 MCP＋HyperFrames＋本機配音，剪輯和動畫不花錢；要付費的只有 AI 生成畫面，和給客戶廣告用的 AI 配音。</p></div>
     <div class="card"><h3>US$0.26–0.37</h3><p class="muted">AI 情境廣告每做 1 秒成片的生成費。約 3 成花在被改掉的關鍵圖，先出草稿確認可再省。</p></div>
+    <div class="card"><h3>US$0.16</h3><p class="muted">純產品動畫每秒成片的生成費。先出 1.5 點的草稿挑圖、開關燈和組回都在本機做，比情境廣告再省一半。</p></div>
   </div>
 </div></section>
 
@@ -611,6 +707,7 @@ footer{padding:40px 0 60px;color:var(--muted);font-size:.85rem;border-top:1px so
 <section id="log"><div class="wrap">
   <h2>更新紀錄</h2>
   <ul class="log">
+    <li><time>2026-10-30</time>新增 3 個案例（軌道燈產品動畫雙版、內建動態範本 × 5 款燈具、無字效果圖 × 5 種光影）、2 個模板、產品動畫的做法與限制、每秒成本 US$0.16。</li>
     <li><time>2026-10-26</time>新增 4 個案例（燈具廣告 4 款、App 操作解說、英文客戶案例、博物館展覽 vlog）、5 個模板、AI 生成新做法與成本數字。</li>
     <li><time>2026-10-16</time>首次公開：工作流、AI 怎麼看片、三類做法、4 個案例、工具與模板、成本數字、剪輯術語目錄。</li>
   </ul>
