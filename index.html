@@ -173,7 +173,7 @@ footer{padding:40px 0 60px;color:var(--muted);font-size:.85rem;border-top:1px so
   <h1>AI 自動剪輯研究</h1>
   <p class="lead">讓 AI 剪片，但剪完人還能改：不直接輸出死的 mp4，而是讓 Claude 寫出<strong>剪映原生草稿</strong>，打開剪映就能逐段、逐字幕修改，最後手動導出。</p>
   <div class="meta">
-    <span class="pill">最後更新 <b id="updated">2026-10-30</b></span>
+    <span class="pill">最後更新 <b id="updated">2026-11-05</b></span>
     <span class="pill">研究起始 2026-09-28</span>
     <span class="pill">完成約 30 個實作專案</span>
     <a class="pill" href="glossary/">剪輯術語目錄 168 條 →</a>
@@ -358,6 +358,58 @@ footer{padding:40px 0 60px;color:var(--muted);font-size:.85rem;border-top:1px so
 <section id="cases"><div class="wrap">
   <h2>案例</h2>
   <p class="sub">已上線的成品，附製作流程和踩坑經驗。</p>
+
+  <article class="case">
+    <div class="media">
+      <figure style="margin:0;width:100%"><video src="assets/case-explainer-short.mp4" poster="assets/case-explainer-short.jpg" controls playsinline preload="metadata" width="1080" height="1920"></video><figcaption class="muted" style="font-size:.78rem;text-align:center;margin-top:2px">短版・卡片庫工具（豎版 91 秒，有聲）</figcaption></figure>
+      <figure style="margin:0;width:100%"><video src="assets/case-explainer-long.mp4" poster="assets/case-explainer-long.jpg" controls playsinline preload="metadata" width="1280" height="720"></video><figcaption class="muted" style="font-size:.78rem;text-align:center;margin-top:2px">長版・分鏡現畫工具（橫版 122 秒，有聲）</figcaption></figure>
+    </div>
+    <div>
+      <span class="tag t2">② AI 生成</span>
+      <h3>同一份歷史筆記，兩種解說動畫工具</h3>
+      <div class="specs"><span>91 秒＋122 秒</span><span>每秒約 26–27 萬 token</span><span>生成費 US$0</span><span>只出 mp4，不能在剪映改</span></div>
+      <h4>製作流程</h4>
+      <ol>
+        <li>把筆記改成口播稿，另列「事實紅線」：哪些說法不能當事實、哪些圖要標示意</li>
+        <li>免費語音配音，用每個字的時間點對齊畫面</li>
+        <li>用開源的 video-talkcraft 和 anything2explainer 各做一支，AI 全程自主，人不介入</li>
+        <li>另派沒參與製作的 AI 抽幀審片，對照筆記核對事實，再修一輪</li>
+      </ol>
+      <h4>經驗</h4>
+      <ul>
+        <li><strong>機器檢查全過不等於沒問題</strong>：一支全過仍有一幀閃白；另一支把清代成書的《明史》列在「明代史料」下，都靠獨立審片才抓到</li>
+        <li>卡片庫工具的動效卡都是橫屏，做豎版要逐張改</li>
+        <li>分鏡現畫工具只出 1280×720，又用了 4 個分組 AI，token 反而比另一支多約 26%</li>
+        <li>目前判斷：都不當主力。沒有實拍畫面時，歷史人文段落試前者，橫版技術解說試後者</li>
+        <li>限制：這兩個工具的授權都禁止商用；修正後的版本沒有再獨立審片，聲音也還沒確認</li>
+      </ul>
+    </div>
+  </article>
+
+  <article class="case">
+    <div class="media">
+      <video src="assets/case-book-promo.mp4" poster="assets/case-book-promo.jpg" controls playsinline preload="metadata" width="1080" height="1920"></video>
+    </div>
+    <div>
+      <span class="tag t2">② AI 生成</span>
+      <h3>書籍網站宣傳片（未修的首輪成片）</h3>
+      <div class="specs"><span>9:16</span><span>36.8 秒</span><span>每秒約 43 萬 token</span><span>生成費 US$0</span></div>
+      <h4>製作流程</h4>
+      <ol>
+        <li>用開源的 video-shotcraft，從真實網頁截圖加上鏡頭卡做動畫</li>
+        <li>人在 5 個節點確認：簡報、視覺方向、鏡頭對應、分鏡、發布</li>
+        <li>動作照範例，顏色和字體換成網站的，風格就不會跑掉</li>
+        <li>工具內建的剪映匯出對不上本機版本，改用自己的草稿工具輸出</li>
+      </ol>
+      <h4>經驗</h4>
+      <ul>
+        <li>工具的硬規定有用：不適合的效果在分鏡前就排除</li>
+        <li>工具預設橫屏，豎版的尺寸和安全區要自己換算，字卡問題幾乎都出在這裡</li>
+        <li>網頁主圖會輪播，截圖要固定視窗尺寸，再用眼睛確認</li>
+        <li><strong>這支留著給你看問題</strong>：照片下緣有硬邊、導覽列被切一半、有張字卡停太短；這些都燒在畫面裡，剪映改不了。結案時沒有再修，草稿也沒實測開啟</li>
+      </ul>
+    </div>
+  </article>
 
   <article class="case">
     <div class="media grid4">
@@ -677,6 +729,9 @@ footer{padding:40px 0 60px;color:var(--muted);font-size:.85rem;border-top:1px so
       <tr><td>封面模板</td><td>②</td><td>12 種 vlog／YouTube 封面版式＋去背；口播封面 4 款</td><td class="st ok">✅</td></tr>
       <tr><td>素材索引</td><td>—</td><td>音樂、音效、實拍、AI 影片寫成索引，AI 自己挑素材</td><td class="st ok">✅</td></tr>
       <tr><td><a href="glossary/">剪輯術語目錄</a></td><td>—</td><td>168 個術語，附可播放範例與各工具指令寫法</td><td class="st ok">✅ 線上看</td></tr>
+      <tr><td>video-talkcraft</td><td>②</td><td>Remotion 動效卡片庫做解說片；歷史人文風，授權禁止商用</td><td class="st wait">⏳ 試過 1 支</td></tr>
+      <tr><td>anything2explainer</td><td>②</td><td>Remotion 分鏡現畫解說片；黑底科技風，只出橫版，授權禁止商用</td><td class="st wait">⏳ 試過 1 支</td></tr>
+      <tr><td>video-shotcraft</td><td>②</td><td>Remotion 真實網頁加鏡頭卡做宣傳片，人逐步確認</td><td class="st wait">⏳ 試過 1 支</td></tr>
       <tr><td>ChatCut 口播流程</td><td>①</td><td>逐字稿剪輯，人和 AI 共用時間軸</td><td class="st wait">⏳ 未實測</td></tr>
     </tbody>
   </table></div>
@@ -707,6 +762,7 @@ footer{padding:40px 0 60px;color:var(--muted);font-size:.85rem;border-top:1px so
 <section id="log"><div class="wrap">
   <h2>更新紀錄</h2>
   <ul class="log">
+    <li><time>2026-11-05</time>新增 2 個案例（同一份歷史筆記的兩種解說動畫工具、書籍網站宣傳片首輪成片）、3 個試用工具。</li>
     <li><time>2026-10-30</time>新增 3 個案例（軌道燈產品動畫雙版、內建動態範本 × 5 款燈具、無字效果圖 × 5 種光影）、2 個模板、產品動畫的做法與限制、每秒成本 US$0.16。</li>
     <li><time>2026-10-26</time>新增 4 個案例（燈具廣告 4 款、App 操作解說、英文客戶案例、博物館展覽 vlog）、5 個模板、AI 生成新做法與成本數字。</li>
     <li><time>2026-10-16</time>首次公開：工作流、AI 怎麼看片、三類做法、4 個案例、工具與模板、成本數字、剪輯術語目錄。</li>
