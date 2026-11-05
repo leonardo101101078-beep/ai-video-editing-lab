@@ -361,6 +361,46 @@ footer{padding:40px 0 60px;color:var(--muted);font-size:.85rem;border-top:1px so
 
   <article class="case">
     <div class="media">
+      <figure style="margin:0;width:100%"><video src="assets/case-zhenghe-depot.mp4" poster="assets/case-zhenghe-depot.jpg" controls playsinline preload="metadata" width="1080" height="1920"></video><figcaption class="muted" style="font-size:.78rem;text-align:center;margin-top:2px">官廠・等軸 2.5D（豎版 49.8 秒，有聲）</figcaption></figure>
+      <figure style="margin:0;width:100%"><video src="assets/case-zhenghe-fleet.mp4" poster="assets/case-zhenghe-fleet.jpg" controls playsinline preload="metadata" width="1080" height="1920"></video><figcaption class="muted" style="font-size:.78rem;text-align:center;margin-top:2px">艦隊規模・貼紙科普（豎版 68.0 秒，有聲）</figcaption></figure>
+    </div>
+    <div>
+      <span class="tag t2">② AI 生成</span>
+      <h3>鄭和科普 MG 兩支：畫面全用程式畫，但太慢</h3>
+      <p>沒有實拍、也不用 AI 生圖，一份歷史筆記做成兩支有配音、配樂、音效、字幕的豎版動畫，另輸出剪映草稿。</p>
+      <div class="specs"><span>49.8 秒＋68.0 秒</span><span>約 99 分（含等人回覆）</span><span>約 4,463 萬 token</span><span>每秒約 38 萬 token</span><span>生成費 0 積分</span></div>
+      <h4>製作流程</h4>
+      <ol>
+        <li>從筆記寫口白，先出靜幀給人選風格：官廠用等軸 2.5D（Three.js 正交相機），艦隊規模用貼紙人科普（Canvas 大畫布）</li>
+        <li>免費語音 edge-tts 配音，用每句時間點對齊畫面</li>
+        <li>加配樂、每秒約 0.84 個音效，輸出分軌的剪映草稿</li>
+        <li>另派沒參與製作的 AI 審片，對照來源核對數字、人名、年份、引文，再修一輪</li>
+      </ol>
+      <h4>為什麼慢</h4>
+      <ul>
+        <li><strong>全片渲染 8 次，約占 50 分，是全程的一半</strong>：多數修改只影響幾秒，卻每次重渲全片</li>
+        <li>一直用最終畫質迭代，官廠的底片顆粒讓原檔到 240 MB</li>
+        <li>兩支同時渲；差距原因沒量測，推測含搶同一台機器的資源</li>
+        <li>審片排在全片三輪之後，音效和字幕對比也是後來才補：米紙底上的白字幾乎看不見，到審片才發現</li>
+      </ul>
+      <h4>下次怎麼做（未實測）</h4>
+      <ul>
+        <li>迭代用半尺寸、不開動態模糊，修改只渲受影響的區段；第一版低畫質就審片，定稿才全畫質渲一次，且逐支渲</li>
+        <li>開工先問音效密度；靜幀階段就疊字幕看對比</li>
+      </ul>
+      <h4>來源與限制</h4>
+      <ul>
+        <li>配樂：Envato 的 The Documentary、Impressive。音效：YouTube 音效庫、Pixabay、Envato</li>
+        <li>片中配置與船形是示意，部分尺寸為估算，出處列在片尾</li>
+        <li>配音、配樂、音效 AI 自己聽不到，只憑檔名和波形選配，讀音也沒驗證</li>
+        <li>剪映草稿已輸出，還沒在剪映裡開啟確認；修正後的版本沒有再獨立審片</li>
+        <li>這裡的字幕是公開版另外燒進畫面的；官廠片尾有字幕掃到淺色沙灘，已知未修</li>
+      </ul>
+    </div>
+  </article>
+
+  <article class="case">
+    <div class="media">
       <figure style="margin:0;width:100%"><video src="assets/case-explainer-short.mp4" poster="assets/case-explainer-short.jpg" controls playsinline preload="metadata" width="1080" height="1920"></video><figcaption class="muted" style="font-size:.78rem;text-align:center;margin-top:2px">短版・卡片庫工具（豎版 91 秒，有聲）</figcaption></figure>
       <figure style="margin:0;width:100%"><video src="assets/case-explainer-long.mp4" poster="assets/case-explainer-long.jpg" controls playsinline preload="metadata" width="1280" height="720"></video><figcaption class="muted" style="font-size:.78rem;text-align:center;margin-top:2px">長版・分鏡現畫工具（橫版 122 秒，有聲）</figcaption></figure>
     </div>
@@ -762,6 +802,7 @@ footer{padding:40px 0 60px;color:var(--muted);font-size:.85rem;border-top:1px so
 <section id="log"><div class="wrap">
   <h2>更新紀錄</h2>
   <ul class="log">
+    <li><time>2026-11-05</time>新增鄭和科普 MG 兩支（程式動畫，49.8 秒＋68.0 秒），附耗時分析與下次做法。</li>
     <li><time>2026-11-05</time>新增 2 個案例（同一份歷史筆記的兩種解說動畫工具、書籍網站宣傳片首輪成片）、3 個試用工具。</li>
     <li><time>2026-10-30</time>新增 3 個案例（軌道燈產品動畫雙版、內建動態範本 × 5 款燈具、無字效果圖 × 5 種光影）、2 個模板、產品動畫的做法與限制、每秒成本 US$0.16。</li>
     <li><time>2026-10-26</time>新增 4 個案例（燈具廣告 4 款、App 操作解說、英文客戶案例、博物館展覽 vlog）、5 個模板、AI 生成新做法與成本數字。</li>
